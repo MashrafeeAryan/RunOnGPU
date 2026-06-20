@@ -1,0 +1,2 @@
+[console_scripts]
+runongpu = runongpu.cli:app
