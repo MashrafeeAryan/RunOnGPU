@@ -4,6 +4,7 @@ import typer
 #Helps print pretty terminal messages
 from rich.console import Console
 from runongpu.config import save_repo_url, load_config
+from runongpu.colab import open_colab
 app = typer.Typer()
 
 console = Console()
@@ -54,5 +55,12 @@ def config():
         return
     console.print("[bold cyan]Saved RunOnGPU config:[/bold cyan]")
     console.print(f"GitHub repo URL: [green]{repo_url['repo_url']}[/green]")
+
+@app.command()
+def run():
+    #Run the saved github repo cuda code on GoogleColab
+    console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
+    open_colab()
 if __name__ == "__main__":
     app()
+    
