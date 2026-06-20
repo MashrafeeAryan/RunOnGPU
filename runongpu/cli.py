@@ -29,5 +29,8 @@ def doctor():
         console.print("[red]✗ Playwright is not installed[/red]")
         console.print("[yellow]Run: pip install playwright[/yellow]")
 
+@app.command()
+def init():
+    
 if __name__ == "__main__":
     app()
