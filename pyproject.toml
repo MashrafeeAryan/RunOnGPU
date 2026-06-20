@@ -1,0 +1,31 @@
+# Package metadata used by pip and Python build tools.
+# This section defines what RunOnGPU is, what Python version it supports,
+# and which third-party libraries must be installed with it.
+[project]
+name = "runongpu"
+version = "0.1.0"
+description = "A CLI tool that runs GitHub CUDA projects on free cloud GPUs"
+requires-python = ">=3.10"
+
+# Runtime dependencies for the CLI.
+# typer: builds clean terminal commands like `runongpu doctor`
+# rich: prints readable, colored terminal output
+# playwright: controls Chrome so RunOnGPU can automate Google Colab
+dependencies = [
+    "typer",
+    "rich",
+    "playwright"
+]
+
+# Exposes RunOnGPU as a terminal command.
+# After installing the package, users can type `runongpu` in their terminal,
+# and Python will run the Typer app defined in runongpu/cli.py.
+[project.scripts]
+runongpu = "runongpu.cli:app"
+
+# Build configuration for modern Python packaging.
+# setuptools packages the project so it can be installed locally during
+# development and later published as a real Python package.
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
