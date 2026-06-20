@@ -13,7 +13,8 @@ CONFIG_FILE = CONFIG_DIR/ "config.json"
 def save_repo_url(repo_url: str) -> None:
     CONFIG_DIR.mkdir(exist_ok=True);
     config = {
-        "repo_url": repo_url
+        "repo_url": repo_url,
+        "notebook_url" : ""
     }
     
     #Writes the url into config.json file
