@@ -7,6 +7,8 @@ from urllib.request import urlopen
 
 from playwright.sync_api import sync_playwright
 
+from runongpu.config import load_config
+
 
 # Finds the real Google Chrome app on Windows.
 # We use real Chrome because Colab login does not like Playwright's default browser.
@@ -111,3 +113,27 @@ def open_colab(notebook_url: str = "") -> str:
         browser.close()
 
         return current_url
+    
+
+def write_code_for_github_clone(page):
+    #Colab code cells use CodeMirror.
+    # .cm-content points to the editable part of each visible code cell
+    cell = page.locator(".cm-content").nth(2)
+    
+    cell.click()
+    saved_config = load_config()
+
+    page.keyboard.press("Control+A")
+    
+    code =  f"""
+    folder_name = {saved_config["folder_name"]},
+    github_repo_url = {saved_config["repo_url"]}
+    !rm -rf {saved_config["folder_name"]}
+    !git clone {saved_config["repo_url"]}
+    %cd {saved_config["folder_name"]}
+        
+        
+        """
+    #Clipboard paste is much faster and more reliable for large code blocks
+    page.evaluate("text => navigator.clipboard.writeText(text)", code)
+    page.keyboard.press("Control+V")
