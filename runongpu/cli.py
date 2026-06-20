@@ -49,16 +49,24 @@ def init():
 @app.command()
 def config():
     #Checks if url is saved or not
-    repo_url = load_config()
-    if repo_url is None:
+    saved_config = load_config()
+    if saved_config is None:
         console.print("[yellow]No repo url found. Run `runongpu init` first.[/yellow]")
         return
     console.print("[bold cyan]Saved RunOnGPU config:[/bold cyan]")
-    console.print(f"GitHub repo URL: [green]{repo_url['repo_url']}[/green]")
+    console.print(f"GitHub repo URL: [green]{saved_config['repo_url']}[/green]")
+
+    notebook_url = saved_config.get("notebook_url", "")
+    
+    if notebook_url:
+        console.print(f"Colab notebook URL: [green]{notebook_url}[/green]")
+    else:
+        console.print("Colab notebook URL: [yellow]Not saved yet[/yellow]")    
 
 @app.command()
 def run():
     #Run the saved github repo cuda code on GoogleColab
+    
     console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
     open_colab()
 if __name__ == "__main__":
