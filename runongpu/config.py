@@ -29,4 +29,13 @@ def load_config() -> dict | None:
     with open(CONFIG_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
     
+#Helper fucntion to save notebook url
+def save_notebook_url(notebook_url: str) -> None:
+    config = load_config()
     
+    if config is None:
+        config = {}
+    config["notebook_url"] = notebook_url
+    
+    with open(CONFIG_FILE, "w", encoding="utf-8") as file:
+        json.dump(config, file, indent=4)
