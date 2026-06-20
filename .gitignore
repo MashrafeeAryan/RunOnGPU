@@ -1,0 +1,35 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build/package files
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local config/secrets
+.env
+*.env
+.remotegpu/
+.runongpu/
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test/cache files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Playwright/browser artifacts
+playwright-report/
+test-results/
