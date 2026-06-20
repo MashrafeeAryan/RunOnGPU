@@ -33,3 +33,5 @@ htmlcov/
 # Playwright/browser artifacts
 playwright-report/
 test-results/
+
+runongpu-chrome-profile/

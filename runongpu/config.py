@@ -4,7 +4,9 @@
 
 import json
 from pathlib import Path
+from rich.console import Console
 
+console = Console()
 # Hidden folder in the user's home directory where RunOnGPU stores settings
 CONFIG_DIR = Path.home() / ".runongpu"
 
@@ -39,3 +41,57 @@ def save_notebook_url(notebook_url: str) -> None:
     
     with open(CONFIG_FILE, "w", encoding="utf-8") as file:
         json.dump(config, file, indent=4)
+        
+        
+
+# Creates a starter runongpu.txt file in the repository.
+# This file tells RunOnGPU how to build, test, and run the project.
+def create_runongpu_template() -> None:
+    txt_path = Path("runongpu.txt")
+
+    if not txt_path.exists():
+
+        txt_path.write_text(
+            """# RunOnGPU Configuration
+#
+# Add one command per line under each section.
+# Empty sections are allowed.
+#
+# Example Python project:
+#
+# [setup]
+# pip install -r requirements.txt
+#
+# [run]
+# python main.py
+#
+# Example CUDA project:
+#
+# [build]
+# nvcc main.cu -o main
+#
+# [run]
+# ./main
+#
+# Example CMake project:
+#
+# [build]
+# cmake -S . -B build
+# cmake --build build
+#
+# [run]
+# ./build/my_program
+
+[setup]
+
+[build]
+
+[test]
+
+[run]
+""",
+            encoding="utf-8",
+        )
+        console.print("[green]✓ Added runongpu.txt to the repo. [/green]")
+    else:
+        console.print("[yellow] runongpu.txt already exists. Good job following instructions! Proud of you! [/yellow]")

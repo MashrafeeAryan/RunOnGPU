@@ -3,7 +3,7 @@ import typer
 
 #Helps print pretty terminal messages
 from rich.console import Console
-from runongpu.config import save_notebook_url, save_repo_url, load_config
+from runongpu.config import create_runongpu_template, save_notebook_url, save_repo_url, load_config
 from runongpu.colab import open_colab
 app = typer.Typer()
 
@@ -43,6 +43,7 @@ def init():
     repo_url =  typer.prompt("Enter your Github repo URL")
     
     save_repo_url(repo_url)
+    create_runongpu_template()
     
     console.print("[green]✓ Github repo URL saved. [/green]")
 

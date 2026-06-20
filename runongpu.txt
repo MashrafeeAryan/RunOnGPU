@@ -1,0 +1,37 @@
+# RunOnGPU Configuration
+#
+# Add one command per line under each section.
+# Empty sections are allowed.
+#
+# Example Python project:
+#
+# [setup]
+# pip install -r requirements.txt
+#
+# [run]
+# python main.py
+#
+# Example CUDA project:
+#
+# [build]
+# nvcc main.cu -o main
+#
+# [run]
+# ./main
+#
+# Example CMake project:
+#
+# [build]
+# cmake -S . -B build
+# cmake --build build
+#
+# [run]
+# ./build/my_program
+
+[setup]
+
+[build]
+
+[test]
+
+[run]
