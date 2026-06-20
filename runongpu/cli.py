@@ -3,7 +3,7 @@ import typer
 
 #Helps print pretty terminal messages
 from rich.console import Console
-from runongpu.config import save_repo_url, load_config
+from runongpu.config import save_notebook_url, save_repo_url, load_config
 from runongpu.colab import open_colab
 app = typer.Typer()
 
@@ -71,10 +71,13 @@ def run():
         console.print("[red]No repo URL saved. Run `runongpu init` first.[/red]")
         return
 
-    notebook_url = saved_config.get("notebook_url", "https://colab.research.google.com")
+    notebook_url = saved_config.get("notebook_url", "")
     
     console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
-    open_colab(notebook_url)
+    current_notebook_url = open_colab(notebook_url)
+    
+    save_notebook_url(current_notebook_url)
+    
 if __name__ == "__main__":
     app()
     
