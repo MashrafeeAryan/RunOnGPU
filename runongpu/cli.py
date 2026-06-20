@@ -66,9 +66,15 @@ def config():
 @app.command()
 def run():
     #Run the saved github repo cuda code on GoogleColab
+    saved_config = load_config()
+    if saved_config is None:
+        console.print("[red]No repo URL saved. Run `runongpu init` first.[/red]")
+        return
+
+    notebook_url = saved_config.get("notebook_url", "https://colab.research.google.com")
     
     console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
-    open_colab()
+    open_colab(notebook_url)
 if __name__ == "__main__":
     app()
     
