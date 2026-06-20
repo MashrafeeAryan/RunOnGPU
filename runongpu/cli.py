@@ -3,7 +3,7 @@ import typer
 
 #Helps print pretty terminal messages
 from rich.console import Console
-from runongpu.config import save_repo_url
+from runongpu.config import save_repo_url, load_config
 app = typer.Typer()
 
 console = Console()
@@ -37,6 +37,15 @@ def init():
     save_repo_url(repo_url)
     
     console.print("[green]✓ Github repo URL saved. [/green]")
-    
+
+@app.command()
+def config():
+    #Checks if url is saved or not
+    repo_url = load_config()
+    if repo_url is None:
+        console.print("[yellow]No repo url found. Run `runongpu init` first.[/yellow]")
+        return
+    console.print("[bold cyan]Saved RunOnGPU config:[/bold cyan]")
+    console.print(f"GitHub repo URL: [green]{repo_url['repo_url']}[/green]")
 if __name__ == "__main__":
     app()
