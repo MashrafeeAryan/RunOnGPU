@@ -8,9 +8,8 @@ from urllib.request import urlopen
 from playwright.sync_api import sync_playwright
 
 
-# Path to the installed Google Chrome executable on Windows.
-# RunOnGPU uses real Chrome instead of Playwright's bundled Chromium because
-# Google Colab login can block automated/unknown browsers.
+# Finds the real Google Chrome app on Windows.
+# We use real Chrome because Colab login does not like Playwright's default browser.
 CHROME_EXE = (
     Path(os.environ["PROGRAMFILES"])
     / "Google"
@@ -19,29 +18,29 @@ CHROME_EXE = (
     / "chrome.exe"
 )
 
-# Dedicated Chrome profile for RunOnGPU.
-# This keeps RunOnGPU separate from the user's personal Chrome profile while
-# still allowing login cookies/session data to persist across runs.
+# RunOnGPU's own Chrome profile.
+# This saves the user's Colab login without touching their personal Chrome profile.
 RUNONGPU_PROFILE_DIR = Path.home() / ".runongpu" / "chrome-profile"
 
-# Local Chrome DevTools Protocol port.
-# Chrome opens this local-only port so Playwright can attach to the real browser.
+# Local port that lets Playwright control real Chrome.
 DEBUG_PORT = 9222
 
-# Shared starter notebook used when the user does not have a saved notebook yet.
+# Starter Colab notebook used when the user does not have their own saved notebook yet.
 TEMPLATE_URL = "https://colab.research.google.com/drive/1l8stgex_LpNC4KEYZJQU6RDJgho1YWDM?usp=sharing"
 
 
 def wait_for_debug_port(timeout_seconds: int = 15) -> None:
-    """Wait until Chrome exposes its local DevTools endpoint."""
+    """Wait until Chrome is ready for Playwright to connect."""
 
     start_time = time.time()
 
     while time.time() - start_time < timeout_seconds:
         try:
+            # If this URL opens, Chrome is listening on the debug port.
             with urlopen(f"http://127.0.0.1:{DEBUG_PORT}/json/version", timeout=1):
                 return
         except URLError:
+            # Chrome may still be starting, so wait a little and try again.
             time.sleep(0.5)
 
     raise RuntimeError(
@@ -51,12 +50,12 @@ def wait_for_debug_port(timeout_seconds: int = 15) -> None:
 
 
 def open_colab(notebook_url: str = "") -> str:
-    """Open an existing Colab notebook or create a Drive copy from the template."""
+    """Open a saved Colab notebook, or copy the template notebook on first run."""
 
     target_url = notebook_url or TEMPLATE_URL
 
-    # Start real Chrome with remote debugging enabled.
-    # The custom user-data-dir gives RunOnGPU its own reusable browser profile.
+    # Start real Chrome with a debug port so Playwright can attach to it.
+    # The RunOnGPU profile keeps login/session data between runs.
     subprocess.Popen([
         str(CHROME_EXE),
         f"--remote-debugging-port={DEBUG_PORT}",
@@ -66,26 +65,44 @@ def open_colab(notebook_url: str = "") -> str:
         target_url,
     ])
 
-    # Do not guess with sleep alone; verify Chrome is actually ready for CDP.
+    # Make sure Chrome is actually ready before Playwright connects.
     wait_for_debug_port()
 
     with sync_playwright() as playwright:
-        # Attach Playwright to the real Chrome session through CDP.
+        # Connect to the Chrome window we just opened.
         browser = playwright.chromium.connect_over_cdp(
             f"http://127.0.0.1:{DEBUG_PORT}"
         )
 
-        # Use the active Chrome context and the newest tab opened by RunOnGPU.
+        # Use the newest Chrome tab.
         context = browser.contexts[0]
         page = context.pages[-1]
 
+        # Open either the user's saved notebook or the template notebook.
         page.goto(target_url)
 
-        # If no notebook has been saved yet, copy the shared template into
-        # the user's Google Drive so future runs can reuse their own notebook.
         if not notebook_url:
-            page.get_by_role("button", name="File", exact=True).click()
-            page.get_by_text("Save a copy in Drive").click()
+            # First run: copy the shared template into the user's Google Drive.
+            while True:
+                old_url = page.url
+
+                page.get_by_role("button", name="File", exact=True).click()
+                page.get_by_text("Save a copy in Drive").click()
+
+                try:
+                    # Success means Colab opened a new Drive notebook, not the login page.
+                    page.wait_for_url(
+                        lambda url: "colab.research.google.com/drive/" in url
+                        and url != old_url
+                        and "accounts.google.com" not in url,
+                        timeout=30000,
+                    )
+
+                    # Colab may open the copied notebook in a new tab, so use the newest tab.
+                    page = context.pages[-1]
+                    break
+                except Exception:
+                    input("Please sign into Colab, then press Enter to try again...")
 
         current_url = page.url
 
