@@ -3,7 +3,7 @@ import typer
 
 #Helps print pretty terminal messages
 from rich.console import Console
-
+from runongpu.config import save_repo_url
 app = typer.Typer()
 
 console = Console()
@@ -31,6 +31,12 @@ def doctor():
 
 @app.command()
 def init():
+    #Saves github repoURl in config file
+    repo_url =  typer.prompt("Enter your Github repo URL")
+    
+    save_repo_url(repo_url)
+    
+    console.print("[green]✓ Github repo URL saved. [/green]")
     
 if __name__ == "__main__":
     app()
