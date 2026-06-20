@@ -21,7 +21,14 @@ def doctor():
     console.print("[green]✓ CLI is running[/green]")
     console.print("[green]✓ Typer is installed[/green]")
     console.print("[green]✓ Rich is installed[/green]")
-    
+    saved_config = load_config()
+
+    if saved_config is None:
+        console.print("[yellow]⚠ No repo URL saved yet[/yellow]")
+        console.print("[yellow]Run: runongpu init[/yellow]")
+        
+    else:
+        console.print("[green]✓ Repo URL is saved[/green]")
     try:
         import playwright
         console.print("[green]✓ Playwright is installed[/green]")
