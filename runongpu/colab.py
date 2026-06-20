@@ -9,6 +9,6 @@ def open_colab() -> None:
         )
         page = browser.new_page()
         page.goto("https://colab.research.google.com")
-        input("Press Enter to close browser...")
+        input("Colab is open. Press Enter when you are done...")
         browser.close()
         
