@@ -5,6 +5,7 @@ import typer
 from rich.console import Console
 from runongpu.config import create_runongpu_template, save_notebook_url, save_repo_url, load_config
 from runongpu.colab import open_colab
+from runongpu.parser import parse_config
 app = typer.Typer()
 
 console = Console()
@@ -72,12 +73,17 @@ def run():
         console.print("[red]No repo URL saved. Run `runongpu init` first.[/red]")
         return
 
+    try:
+        project_config = parse_config()
+    except ValueError as error:
+        console.print(f"[red] runongpu.txt error: [/red]\n {error}")
     notebook_url = saved_config.get("notebook_url", "")
     
     console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
     current_notebook_url = open_colab(notebook_url)
     
     save_notebook_url(current_notebook_url)
+    
     
 if __name__ == "__main__":
     app()
