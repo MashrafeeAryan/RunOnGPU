@@ -82,8 +82,6 @@ def open_colab(notebook_url: str = "") -> str:
         context = browser.contexts[0]
         page = context.pages[-1]
 
-        # Open either the user's saved notebook or the template notebook.
-        page.goto(target_url)
 
         if not notebook_url:
             while True:
@@ -105,7 +103,8 @@ def open_colab(notebook_url: str = "") -> str:
 
                 input("Please sign into Colab, then press Enter to try again...")
         current_url = page.url
-        console.print(f"[green]Notebook URL saved:[/green] {current_url}")
+        #console.print(f"[green]Notebook URL saved:[/green] {current_url}")
+        write_code_for_github_clone(page)
         input("Colab is open. Press Enter when done...")
 
         browser.close()
@@ -114,18 +113,20 @@ def open_colab(notebook_url: str = "") -> str:
     
 
 def write_code_for_github_clone(page):
+    saved_config = load_config()
     #Colab code cells use CodeMirror.
     # .cm-content points to the editable part of each visible code cell
-    cell = page.locator(".cm-content").nth(2)
-    
-    cell.click()
-    saved_config = load_config()
+    console.print(f"CodeMirror editors: {page.locator('.CodeMirror-code').count()}")
+    console.print(f"Text areas: {page.locator('textarea').count()}")
+    editor = page.locator(".monaco-editor").nth(0)
+    editor.wait_for(timeout=60000)
+    editor.click()
 
     page.keyboard.press("Control+A")
     
     code =  f"""
-    folder_name = {saved_config["folder_name"]},
-    github_repo_url = {saved_config["repo_url"]}
+    folder_name = "{saved_config["folder_name"]}"
+    github_repo_url = "{saved_config["repo_url"]}"
     !rm -rf {saved_config["folder_name"]}
     !git clone {saved_config["repo_url"]}
     %cd {saved_config["folder_name"]}
