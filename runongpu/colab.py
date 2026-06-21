@@ -112,27 +112,37 @@ def open_colab(notebook_url: str = "") -> str:
         return current_url
     
 
-def write_code_for_github_clone(page):
+def write_runongpu_cell(page, project_config: dict):
     saved_config = load_config()
-    #Colab code cells use CodeMirror.
+    #Colab code cells use Monaco editor.
     # .cm-content points to the editable part of each visible code cell
-    console.print(f"CodeMirror editors: {page.locator('.CodeMirror-code').count()}")
-    console.print(f"Text areas: {page.locator('textarea').count()}")
+    # console.print(f"CodeMirror editors: {page.locator('.CodeMirror-code').count()}")
+    # console.print(f"Text areas: {page.locator('textarea').count()}")
     editor = page.locator(".monaco-editor").nth(0)
     editor.wait_for(timeout=60000)
     editor.click()
 
+    
+    #Grab the commands from the file
+    all_commands = (
+        project_config["setup"]
+        + project_config["build"]
+        + project_config["test"]
+        + project_config["run"]
+    )
+    
+    command_lines = "\n".join(f"!{command}" for command in all_commands)
+    
     page.keyboard.press("Control+A")
     
-    code =  f"""
-    folder_name = "{saved_config["folder_name"]}"
-    github_repo_url = "{saved_config["repo_url"]}"
-    !rm -rf {saved_config["folder_name"]}
-    !git clone {saved_config["repo_url"]}
-    %cd {saved_config["folder_name"]}
-        
-        
-        """
+    code =  f"""folder_name = "{saved_config["folder_name"]}"
+github_repo_url = "{saved_config["repo_url"]}"
+!rm -rf {saved_config["folder_name"]}
+!git clone {saved_config["repo_url"]}
+%cd {saved_config["folder_name"]}
+{command_lines}
+"""
+
     #Clipboard paste is much faster and more reliable for large code blocks
     page.evaluate("text => navigator.clipboard.writeText(text)", code)
     page.keyboard.press("Control+V")

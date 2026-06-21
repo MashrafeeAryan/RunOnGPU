@@ -4,7 +4,7 @@ import typer
 #Helps print pretty terminal messages
 from rich.console import Console
 from runongpu.config import create_runongpu_template, save_notebook_url, save_repo_url, load_config
-from runongpu.colab import open_colab
+from runongpu.colab import open_colab, write_code_for_github_clone
 from runongpu.parser import parse_config
 app = typer.Typer()
 
@@ -84,11 +84,7 @@ def run():
     console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
     current_notebook_url = open_colab(notebook_url)
     
-    #For debugging
-    console.print(f"[cyan]Notebook URL returned:[/cyan] {current_notebook_url}")
-
     save_notebook_url(current_notebook_url)
-    
 if __name__ == "__main__":
     app()
     
