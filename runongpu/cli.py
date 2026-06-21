@@ -42,8 +42,9 @@ def doctor():
 def init():
     #Saves github repoURl in config file
     repo_url =  typer.prompt("Enter your Github repo URL")
+    folder_name =  typer.prompt("Enter your Github repo's root folder name")
     
-    save_repo_url(repo_url)
+    save_repo_url(repo_url, folder_name)
     create_runongpu_template()
     
     console.print("[green]✓ Github repo URL saved. [/green]")
@@ -77,13 +78,16 @@ def run():
         project_config = parse_config()
     except ValueError as error:
         console.print(f"[red] runongpu.txt error: [/red]\n {error}")
+        return
     notebook_url = saved_config.get("notebook_url", "")
     
     console.print("[bold cyan]Starting RunOnGPU...[/bold cyan]")
     current_notebook_url = open_colab(notebook_url)
     
+    #For debugging
+    console.print(f"[cyan]Notebook URL returned:[/cyan] {current_notebook_url}")
+
     save_notebook_url(current_notebook_url)
-    
     
 if __name__ == "__main__":
     app()

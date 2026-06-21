@@ -9,7 +9,9 @@ from playwright.sync_api import sync_playwright
 
 from runongpu.config import load_config
 
+from rich.console import Console
 
+console = Console()
 # Finds the real Google Chrome app on Windows.
 # We use real Chrome because Colab login does not like Playwright's default browser.
 CHROME_EXE = (
@@ -28,7 +30,7 @@ RUNONGPU_PROFILE_DIR = Path.home() / ".runongpu" / "chrome-profile"
 DEBUG_PORT = 9222
 
 # Starter Colab notebook used when the user does not have their own saved notebook yet.
-TEMPLATE_URL = "https://colab.research.google.com/drive/1l8stgex_LpNC4KEYZJQU6RDJgho1YWDM?usp=sharing"
+TEMPLATE_URL = "https://colab.research.google.com/drive/1pB8iVjR4-tPVSEBFjY8ow6N_F34bcMwi?usp=sharing"
 
 
 def wait_for_debug_port(timeout_seconds: int = 15) -> None:
@@ -84,30 +86,26 @@ def open_colab(notebook_url: str = "") -> str:
         page.goto(target_url)
 
         if not notebook_url:
-            # First run: copy the shared template into the user's Google Drive.
             while True:
-                old_url = page.url
-
                 page.get_by_role("button", name="File", exact=True).click()
                 page.get_by_text("Save a copy in Drive").click()
 
-                try:
-                    # Success means Colab opened a new Drive notebook, not the login page.
-                    page.wait_for_url(
-                        lambda url: "colab.research.google.com/drive/" in url
-                        and url != old_url
-                        and "accounts.google.com" not in url,
-                        timeout=30000,
-                    )
+                time.sleep(15)
 
-                    # Colab may open the copied notebook in a new tab, so use the newest tab.
-                    page = context.pages[-1]
+                # Colab may open the copied notebook in a new tab.
+                page = context.pages[-1]
+
+                copied_successfully = (
+                    page.url != target_url
+                    and "accounts.google.com" not in page.url
+                )
+
+                if copied_successfully:
                     break
-                except Exception:
-                    input("Please sign into Colab, then press Enter to try again...")
 
+                input("Please sign into Colab, then press Enter to try again...")
         current_url = page.url
-
+        console.print(f"[green]Notebook URL saved:[/green] {current_url}")
         input("Colab is open. Press Enter when done...")
 
         browser.close()

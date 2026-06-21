@@ -12,11 +12,12 @@ CONFIG_DIR = Path.home() / ".runongpu"
 
 CONFIG_FILE = CONFIG_DIR/ "config.json"
 
-def save_repo_url(repo_url: str) -> None:
+def save_repo_url(repo_url: str, folder_name: str) -> None:
     CONFIG_DIR.mkdir(exist_ok=True);
     config = {
         "repo_url": repo_url,
-        "notebook_url" : ""
+        "notebook_url" : "",
+        "folder_name" : folder_name
     }
     
     #Writes the url into config.json file
@@ -95,3 +96,4 @@ def create_runongpu_template() -> None:
         console.print("[green]✓ Added runongpu.txt to the repo. [/green]")
     else:
         console.print("[yellow] runongpu.txt already exists. Good job following instructions! Proud of you! [/yellow]")
+
