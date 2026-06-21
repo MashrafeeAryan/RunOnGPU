@@ -53,7 +53,7 @@ def wait_for_debug_port(timeout_seconds: int = 15) -> None:
     )
 
 
-def open_colab(notebook_url: str = "") -> str:
+def open_colab(notebook_url: str = "", project_config: dict | None = None) -> str:
     """Open a saved Colab notebook, or copy the template notebook on first run."""
 
     target_url = notebook_url or TEMPLATE_URL
@@ -104,7 +104,7 @@ def open_colab(notebook_url: str = "") -> str:
                 input("Please sign into Colab, then press Enter to try again...")
         current_url = page.url
         #console.print(f"[green]Notebook URL saved:[/green] {current_url}")
-        write_code_for_github_clone(page)
+        write_runongpu_cell(page, project_config)
         input("Colab is open. Press Enter when done...")
 
         browser.close()
@@ -119,7 +119,7 @@ def write_runongpu_cell(page, project_config: dict):
     # console.print(f"CodeMirror editors: {page.locator('.CodeMirror-code').count()}")
     # console.print(f"Text areas: {page.locator('textarea').count()}")
     editor = page.locator(".monaco-editor").nth(0)
-    editor.wait_for(timeout=60000)
+    editor.wait_for(timeout=30000)
     editor.click()
 
     
