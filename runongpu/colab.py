@@ -105,6 +105,15 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
         current_url = page.url
         #console.print(f"[green]Notebook URL saved:[/green] {current_url}")
         write_runongpu_cell(page, project_config)
+        page.get_by_role("button", name="Runtime", exact=True).click()
+        page.get_by_text("Change runtime type").click()
+        page.get_by_role("radio", name="T4 GPU").click()
+        page.get_by_role("button", name="Save").click()
+
+        page.get_by_role("button", name="Runtime", exact=True).click()
+        page.get_by_text("Run allCtrl+F9").click()
+
+
         input("Colab is open. Press Enter when done...")
 
         browser.close()
@@ -146,3 +155,5 @@ github_repo_url = "{saved_config["repo_url"]}"
     #Clipboard paste is much faster and more reliable for large code blocks
     page.evaluate("text => navigator.clipboard.writeText(text)", code)
     page.keyboard.press("Control+V")
+    
+    
