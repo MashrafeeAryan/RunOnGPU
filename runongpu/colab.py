@@ -109,7 +109,6 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
         page.get_by_text("Change runtime type").click()
         page.get_by_role("radio", name="T4 GPU").click()
         page.get_by_role("button", name="Save").click()
-
         page.get_by_role("button", name="Runtime", exact=True).click()
         page.get_by_text("Run allCtrl+F9").click()
 
