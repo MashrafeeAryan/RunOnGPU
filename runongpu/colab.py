@@ -129,7 +129,7 @@ def write_runongpu_cell(page, project_config: dict):
     # console.print(f"Text areas: {page.locator('textarea').count()}")
     page.keyboard.press("Escape")
     page.wait_for_timeout(1000)
-    editor = page.locator(".monaco-editor").nth(0)
+    editor = page.locator("div.cell.code .monaco-editor:visible").nth(0)
     editor.wait_for(timeout=30000)
     editor.click()
 
