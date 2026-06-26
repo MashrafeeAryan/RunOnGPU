@@ -101,10 +101,16 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
                 if copied_successfully:
                     break
 
-                input("Please sign into Colab, then press Enter to try again...")
+                input("Please sign into Colab, then press Enter to try again. If already signed in, press enter...")
         current_url = page.url
+        if project_config is None:
+            raise RuntimeError("project_config was not passed into open_colab().")
         #console.print(f"[green]Notebook URL saved:[/green] {current_url}")
+        console.print(f"[cyan]project_config:[/cyan] {project_config}")
+        console.print("[cyan]Writing RunOnGPU cell...[/cyan]")
         write_runongpu_cell(page, project_config)
+  
+        console.print("[green]✓ RunOnGPU cell written[/green]")
         page.get_by_role("button", name="Runtime", exact=True).click()
         page.get_by_role("menuitem", name="Change runtime type").click()
         page.get_by_role("radio", name="T4 GPU").click()
