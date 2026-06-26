@@ -132,6 +132,8 @@ def write_runongpu_cell(page, project_config: dict):
     # .cm-content points to the editable part of each visible code cell
     # console.print(f"CodeMirror editors: {page.locator('.CodeMirror-code').count()}")
     # console.print(f"Text areas: {page.locator('textarea').count()}")
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(1000)
     editor = page.locator(".monaco-editor").nth(0)
     editor.wait_for(timeout=30000)
     editor.click()
@@ -161,4 +163,18 @@ github_repo_url = "{saved_config["repo_url"]}"
     page.evaluate("text => navigator.clipboard.writeText(text)", code)
     page.keyboard.press("Control+V")
     
-    
+def set_t4_gpu_and_run_all(page) -> None:
+    # Open runtime settings
+    page.get_by_role("button", name="Runtime", exact=True).click()
+    page.get_by_role("menuitem", name="Change runtime type", exact=True).click()
+
+    # Choose T4 GPU and save
+    page.get_by_role("radio", name="T4 GPU").click()
+    page.get_by_role("button", name="Save").click()
+
+    # Give Colab time to close the runtime dialog
+    page.wait_for_timeout(3000)
+    page.keyboard.press("Escape")
+
+    # Run all cells using shortcut instead of fragile menu text
+    page.keyboard.press("Control+F9")
