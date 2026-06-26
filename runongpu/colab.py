@@ -106,7 +106,7 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
         #console.print(f"[green]Notebook URL saved:[/green] {current_url}")
         write_runongpu_cell(page, project_config)
         page.get_by_role("button", name="Runtime", exact=True).click()
-        page.get_by_text("Change runtime type").click()
+        page.get_by_role("menuitem", name="Change runtime type").click()
         page.get_by_role("radio", name="T4 GPU").click()
         page.get_by_role("button", name="Save").click()
         page.get_by_role("button", name="Runtime", exact=True).click()
