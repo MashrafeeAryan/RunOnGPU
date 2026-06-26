@@ -111,12 +111,7 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
         write_runongpu_cell(page, project_config)
   
         console.print("[green]✓ RunOnGPU cell written[/green]")
-        page.get_by_role("button", name="Runtime", exact=True).click()
-        page.get_by_role("menuitem", name="Change runtime type").click()
-        page.get_by_role("radio", name="T4 GPU").click()
-        page.get_by_role("button", name="Save").click()
-        page.get_by_role("button", name="Runtime", exact=True).click()
-        page.get_by_text("Run allCtrl+F9").click()
+        set_t4_gpu_and_run_all(page)
 
 
         input("Colab is open. Press Enter when done...")
@@ -165,16 +160,26 @@ github_repo_url = "{saved_config["repo_url"]}"
     
 def set_t4_gpu_and_run_all(page) -> None:
     # Open runtime settings
+    console.print("[cyan]Opening Runtime menu...[/cyan]")
     page.get_by_role("button", name="Runtime", exact=True).click()
+    
+    console.print("[cyan]Opening Change runtime type...[/cyan]")
     page.get_by_role("menuitem", name="Change runtime type", exact=True).click()
 
     # Choose T4 GPU and save
+    console.print("[cyan]Selecting T4 GPU...[/cyan]")
     page.get_by_role("radio", name="T4 GPU").click()
+    
+    console.print("[cyan]Saving runtime settings...[/cyan]")
     page.get_by_role("button", name="Save").click()
 
     # Give Colab time to close the runtime dialog
+    console.print("[cyan]Waiting for runtime dialog to close...[/cyan]")
     page.wait_for_timeout(3000)
     page.keyboard.press("Escape")
 
-    # Run all cells using shortcut instead of fragile menu text
+    # Run all cells using shortcut 
+    #This might be fragile
+    console.print("[cyan]Running all cells...[/cyan]")
     page.keyboard.press("Control+F9")
+    console.print("[green]✓ Runtime set and cells started[/green]")
