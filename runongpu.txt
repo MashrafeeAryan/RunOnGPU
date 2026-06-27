@@ -31,9 +31,9 @@
 [setup]
 
 [build]
-nvcc main.cu -o vector_add
+cd cuda/vector-add && nvcc main.cu -o vector_add
 
 [test]
 
 [run]
-./vector_add
+cd cuda/vector-add && ./vector_add
