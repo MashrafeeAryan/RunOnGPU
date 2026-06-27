@@ -129,10 +129,12 @@ def write_runongpu_cell(page, project_config: dict):
     # console.print(f"Text areas: {page.locator('textarea').count()}")
     page.keyboard.press("Escape")
     page.wait_for_timeout(1000)
-    editor = page.locator("div.cell.code .monaco-editor:visible").nth(0)
-    editor.wait_for(timeout=30000)
-    editor.click()
+    # editor = page.locator("div.cell.code .monaco-editor:visible").nth(0)
+    # editor.wait_for(timeout=30000)
+    # editor.click()
 
+    target_cell = page.get_by_text("# Paste your code here:", exact=False).first
+    target_cell.click()
     
     #Grab the commands from the file
     all_commands = (
@@ -146,11 +148,16 @@ def write_runongpu_cell(page, project_config: dict):
     
     page.keyboard.press("Control+A")
     
-    code =  f"""folder_name = "{saved_config["folder_name"]}"
-github_repo_url = "{saved_config["repo_url"]}"
-!rm -rf {saved_config["folder_name"]}
-!git clone {saved_config["repo_url"]}
-%cd {saved_config["folder_name"]}
+    folder_name = saved_config["folder_name"]
+    repo_url = saved_config["repo_url"]
+
+    code =  f"""
+# Paste your code here:
+folder_name = "{folder_name}"
+github_repo_url = "{repo_url}"
+!rm -rf {folder_name}
+!git clone {{github_repo_url}}
+%cd {{folder_name}}
 {command_lines}
 """
 

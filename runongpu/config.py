@@ -97,3 +97,5 @@ def create_runongpu_template() -> None:
     else:
         console.print("[yellow] runongpu.txt already exists. Good job following instructions! Proud of you! [/yellow]")
 
+def get_folder_name_from_repo_url(repo_url: str) -> str:
+    return repo_url.rstrip("/").split("/")[-1].replace(".git", "")

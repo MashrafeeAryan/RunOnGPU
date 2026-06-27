@@ -3,7 +3,7 @@ import typer
 
 #Helps print pretty terminal messages
 from rich.console import Console
-from runongpu.config import create_runongpu_template, save_notebook_url, save_repo_url, load_config
+from runongpu.config import create_runongpu_template, get_folder_name_from_repo_url, save_notebook_url, save_repo_url, load_config
 from runongpu.colab import open_colab
 from runongpu.parser import parse_config
 app = typer.Typer()
@@ -42,8 +42,11 @@ def doctor():
 def init():
     #Saves github repoURl in config file
     repo_url =  typer.prompt("Enter your Github repo URL")
-    folder_name =  typer.prompt("Enter your Github repo's root folder name")
     
+    console.print("[yellow]Deriving folder name[/yellow]")
+    folder_name = get_folder_name_from_repo_url(repo_url)
+    console.print("[green]Successfully derived folder name[/green]")
+        
     save_repo_url(repo_url, folder_name)
     create_runongpu_template()
     
