@@ -85,13 +85,14 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
 
         if not notebook_url:
             while True:
-                page.get_by_role("button", name="File", exact=True).click()
-                page.get_by_text("Save a copy in Drive").click()
+                with context.expect_page() as new_page_info:
+                    page.get_by_role("button", name="File", exact=True).click()
+                    page.get_by_text("Save a copy in Drive").click()
 
-                time.sleep(15)
 
                 # Colab may open the copied notebook in a new tab.
-                page = context.pages[-1]
+                page = new_page_info.value
+                page.wait_for_load_state("domcontentloaded")
 
                 copied_successfully = (
                     page.url != target_url
