@@ -1,53 +1,60 @@
-# Confgiuration helpers for RunOnGPU
-# This file saves and loads the user's project settings, such as:
-# - GitHub repository URL
+# Configuration helpers for RunOnGPU.
+# This file manages small local settings that should persist between CLI runs,
+# such as the GitHub repository URL and the copied Colab notebook URL.
 
 import json
 from pathlib import Path
 from rich.console import Console
 
 console = Console()
-# Hidden folder in the user's home directory where RunOnGPU stores settings
+
+# Store RunOnGPU settings in the user's home directory instead of the project repo.
+# This keeps personal/local state out of Git.
 CONFIG_DIR = Path.home() / ".runongpu"
 
-CONFIG_FILE = CONFIG_DIR/ "config.json"
+CONFIG_FILE = CONFIG_DIR / "config.json"
+
 
 def save_repo_url(repo_url: str, folder_name: str) -> None:
-    CONFIG_DIR.mkdir(exist_ok=True);
+    CONFIG_DIR.mkdir(exist_ok=True)
     config = {
         "repo_url": repo_url,
-        "notebook_url" : "",
-        "folder_name" : folder_name
+        "notebook_url": "",
+        "folder_name": folder_name
     }
-    
-    #Writes the url into config.json file
-    with open(CONFIG_FILE, "w", encoding="utf-8") as file:
-        json.dump(config, file, indent=4);
 
-# Load the saved RunOnGPU configuration from disk
-def load_config() -> dict | None:
-    if not CONFIG_FILE.exists():
-        return None
-    #Reads json file and turns it  back into python dictionary
-    with open(CONFIG_FILE, "r", encoding="utf-8") as file:
-        return json.load(file)
-    
-#Helper fucntion to save notebook url
-def save_notebook_url(notebook_url: str) -> None:
-    config = load_config()
-    
-    if config is None:
-        config = {}
-    config["notebook_url"] = notebook_url
-    
+    # Persist the selected project so future `runongpu run` calls know what to clone.
     with open(CONFIG_FILE, "w", encoding="utf-8") as file:
         json.dump(config, file, indent=4)
-        
-        
 
-# Creates a starter runongpu.txt file in the repository.
-# This file tells RunOnGPU how to build, test, and run the project.
-def create_runongpu_template() -> None:
+
+def load_config() -> dict | None:
+    # Return None when the user has not run `runongpu init` yet.
+    if not CONFIG_FILE.exists():
+        return None
+
+    # Convert the saved JSON config back into a Python dictionary.
+    with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+        return json.load(file)
+
+
+def save_notebook_url(notebook_url: str) -> None:
+    # Keep the copied Colab notebook URL so RunOnGPU reuses it instead of
+    # creating a new notebook copy every time.
+    config = load_config()
+
+    if config is None:
+        config = {}
+
+    config["notebook_url"] = notebook_url
+
+    with open(CONFIG_FILE, "w", encoding="utf-8") as file:
+        json.dump(config, file, indent=4)
+
+
+def create_runongpu_template_file() -> None:
+    # Create a starter runongpu.txt in the current project folder.
+    # The file documents the command sections that RunOnGPU later parses.
     txt_path = Path("runongpu.txt")
 
     if not txt_path.exists():
@@ -97,5 +104,8 @@ def create_runongpu_template() -> None:
     else:
         console.print("[yellow] runongpu.txt already exists. Good job following instructions! Proud of you! [/yellow]")
 
+
 def get_folder_name_from_repo_url(repo_url: str) -> str:
+    # Git clones repositories into a folder named after the repo, so derive that
+    # folder name from the URL instead of asking the user to type it manually.
     return repo_url.rstrip("/").split("/")[-1].replace(".git", "")
