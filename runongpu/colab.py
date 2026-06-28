@@ -40,7 +40,6 @@ TEMPLATE_URL = "https://colab.research.google.com/drive/1pB8iVjR4-tPVSEBFjY8ow6N
 
 def wait_for_debug_port(timeout_seconds: int = 15) -> None:
     """Wait until Chrome is ready for Playwright to connect."""
-
     start_time = time.time()
 
     while time.time() - start_time < timeout_seconds:
@@ -52,6 +51,7 @@ def wait_for_debug_port(timeout_seconds: int = 15) -> None:
             # Chrome can take a moment to launch, so retry briefly instead of failing immediately.
             time.sleep(0.5)
 
+    
     raise RuntimeError(
         f"Chrome did not open remote debugging port {DEBUG_PORT}. "
         "Close Chrome and try again, or use a different debug port."
