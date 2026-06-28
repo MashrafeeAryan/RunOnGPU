@@ -102,7 +102,7 @@ def create_runongpu_template_file() -> None:
         )
         console.print("[green]✓ Added runongpu.txt to the repo. [/green]")
     else:
-        console.print("[yellow] runongpu.txt already exists. Good job following instructions! Proud of you! [/yellow]")
+        console.print("[yellow]runongpu.txt already exists. Good job! Proud of you! [/yellow]")
 
 
 def get_folder_name_from_repo_url(repo_url: str) -> str:
