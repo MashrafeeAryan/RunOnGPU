@@ -6,6 +6,7 @@ name = "runongpu"
 version = "0.1.0"
 description = "A CLI tool that runs GitHub projects on free cloud GPUs"
 requires-python = ">=3.10"
+readme = "README.md"
 
 # Runtime dependencies for the CLI.
 # typer: builds clean terminal commands like `runongpu doctor`

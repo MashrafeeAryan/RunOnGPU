@@ -1,6 +1,6 @@
 # RunOnGPU
 
-RunOnGPU is a CLI tool that helps you run GitHub projects on a Google Colab GPU.
+RunOnGPU is a CLI tool that helps you run GitHub projects on a GPU with minimal setup.
 
 It is useful if you want to test CUDA, PyTorch, or other GPU code but do not have a local NVIDIA GPU.
 
@@ -14,31 +14,9 @@ It is useful if you want to test CUDA, PyTorch, or other GPU code but do not hav
 
 ## Install
 
-Clone the repo:
-
 ```bash
-git clone https://github.com/MashrafeeAryan/RunOnGPU.git
-cd RunOnGPU
-```
-
-Create and activate a virtual environment:
-
-```bash
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-Install RunOnGPU:
-
-```bash
-python -m pip install -e .
-```
-
-Install Playwright:
-
-```bash
+pip install runongpu
 python -m playwright install
-```
 
 Check setup:
 
