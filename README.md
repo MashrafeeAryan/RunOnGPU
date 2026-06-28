@@ -15,8 +15,9 @@ It is useful if you want to test CUDA, PyTorch, or other GPU code but do not hav
 ## Install
 
 ```bash
-pip install runongpu
-python -m playwright install
+python -m pip install --user pipx
+python -m pipx ensurepath
+python -m pipx install runongpu
 
 Check setup:
 
