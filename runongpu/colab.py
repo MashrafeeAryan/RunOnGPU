@@ -12,8 +12,10 @@ from runongpu.config import load_config
 from rich.console import Console
 
 console = Console()
-# Finds the real Google Chrome app on Windows.
-# We use real Chrome because Colab login does not like Playwright's default browser.
+
+# Path to the real Chrome executable on Windows.
+# RunOnGPU uses real Chrome because Colab/Google login is more reliable there
+# than in Playwright's bundled browser.
 CHROME_EXE = (
     Path(os.environ["PROGRAMFILES"])
     / "Google"
@@ -22,14 +24,17 @@ CHROME_EXE = (
     / "chrome.exe"
 )
 
-# RunOnGPU's own Chrome profile.
-# This saves the user's Colab login without touching their personal Chrome profile.
+# Dedicated Chrome profile for RunOnGPU.
+# This keeps Colab login/session data persistent without touching the user's
+# everyday Chrome profile.
 RUNONGPU_PROFILE_DIR = Path.home() / ".runongpu" / "chrome-profile"
 
-# Local port that lets Playwright control real Chrome.
+# Local Chrome DevTools Protocol port.
+# Playwright connects to this port to control the real Chrome window.
 DEBUG_PORT = 9222
 
-# Starter Colab notebook used when the user does not have their own saved notebook yet.
+# Shared starter notebook used only when the user does not already have a saved
+# RunOnGPU notebook URL.
 TEMPLATE_URL = "https://colab.research.google.com/drive/1pB8iVjR4-tPVSEBFjY8ow6N_F34bcMwi?usp=sharing"
 
 
@@ -40,11 +45,11 @@ def wait_for_debug_port(timeout_seconds: int = 15) -> None:
 
     while time.time() - start_time < timeout_seconds:
         try:
-            # If this URL opens, Chrome is listening on the debug port.
+            # Chrome exposes this local endpoint after remote debugging starts.
             with urlopen(f"http://127.0.0.1:{DEBUG_PORT}/json/version", timeout=1):
                 return
         except URLError:
-            # Chrome may still be starting, so wait a little and try again.
+            # Chrome can take a moment to launch, so retry briefly instead of failing immediately.
             time.sleep(0.5)
 
     raise RuntimeError(
@@ -58,8 +63,8 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
 
     target_url = notebook_url or TEMPLATE_URL
 
-    # Start real Chrome with a debug port so Playwright can attach to it.
-    # The RunOnGPU profile keeps login/session data between runs.
+    # Launch real Chrome with remote debugging enabled so Playwright can attach.
+    # The custom profile lets users sign into Colab once and reuse that session.
     subprocess.Popen([
         str(CHROME_EXE),
         f"--remote-debugging-port={DEBUG_PORT}",
@@ -69,28 +74,28 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
         target_url,
     ])
 
-    # Make sure Chrome is actually ready before Playwright connects.
+    # Avoid connecting before Chrome has opened its debugging endpoint.
     wait_for_debug_port()
 
     with sync_playwright() as playwright:
-        # Connect to the Chrome window we just opened.
+        # Attach to the already-open real Chrome window instead of launching a new browser.
         browser = playwright.chromium.connect_over_cdp(
             f"http://127.0.0.1:{DEBUG_PORT}"
         )
 
-        # Use the newest Chrome tab.
+        # Use the active browser context and newest tab opened by RunOnGPU.
         context = browser.contexts[0]
         page = context.pages[-1]
 
-
         if not notebook_url:
             while True:
+                # Saving a copy usually opens a new Colab tab. expect_page captures
+                # that tab directly instead of guessing with context.pages[-1].
                 with context.expect_page() as new_page_info:
                     page.get_by_role("button", name="File", exact=True).click()
                     page.get_by_text("Save a copy in Drive").click()
 
-
-                # Colab may open the copied notebook in a new tab.
+                # Switch automation to the copied notebook tab.
                 page = new_page_info.value
                 page.wait_for_load_state("domcontentloaded")
 
@@ -103,52 +108,53 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
                     break
 
                 input("Please sign into Colab, then press Enter to try again. If already signed in, press enter...")
+
         current_url = page.url
+
         if project_config is None:
             raise RuntimeError("project_config was not passed into open_colab().")
-        #console.print(f"[green]Notebook URL saved:[/green] {current_url}")
+
+        # project_config contains the parsed setup/build/test/run commands from runongpu.txt.
         console.print(f"[cyan]project_config:[/cyan] {project_config}")
         console.print("[cyan]Writing RunOnGPU cell...[/cyan]")
         write_runongpu_cell(page, project_config)
-  
+
         console.print("[green]✓ RunOnGPU cell written[/green]")
         set_t4_gpu_and_run_all(page)
-
 
         input("Colab is open. Press Enter when done...")
 
         browser.close()
 
         return current_url
-    
+
 
 def write_runongpu_cell(page, project_config: dict):
     saved_config = load_config()
-    #Colab code cells use Monaco editor.
-    # .cm-content points to the editable part of each visible code cell
-    # console.print(f"CodeMirror editors: {page.locator('.CodeMirror-code').count()}")
-    # console.print(f"Text areas: {page.locator('textarea').count()}")
+
+    # Close popups such as Gemini/Colab assistant before selecting the target cell.
     page.keyboard.press("Escape")
     page.wait_for_timeout(1000)
-    # editor = page.locator("div.cell.code .monaco-editor:visible").nth(0)
-    # editor.wait_for(timeout=30000)
-    # editor.click()
 
+    # Target a known marker in the template instead of relying on the first visible editor.
+    # This avoids accidentally pasting into Gemini or another popup editor.
     target_cell = page.get_by_text("# Paste your code here:", exact=False).first
     target_cell.click()
-    
-    #Grab the commands from the file
+
+    # Preserve the intended execution order from runongpu.txt:
+    # install dependencies, build the project, run tests, then run the program.
     all_commands = (
         project_config["setup"]
         + project_config["build"]
         + project_config["test"]
         + project_config["run"]
     )
-    
+
+    # Colab shell commands use !, so each parsed command becomes a notebook shell line.
     command_lines = "\n".join(f"!{command}" for command in all_commands)
-    
+
     page.keyboard.press("Control+A")
-    
+
     folder_name = saved_config["folder_name"]
     repo_url = saved_config["repo_url"]
 
@@ -162,32 +168,32 @@ github_repo_url = "{repo_url}"
 {command_lines}
 """
 
-    #Clipboard paste is much faster and more reliable for large code blocks
+    # Clipboard paste is faster and more reliable than typing long generated cells.
     page.evaluate("text => navigator.clipboard.writeText(text)", code)
     page.keyboard.press("Control+V")
-    
+
+
 def set_t4_gpu_and_run_all(page) -> None:
-    # Open runtime settings
+    # Open Colab runtime settings so the notebook uses a GPU runtime.
     console.print("[cyan]Opening Runtime menu...[/cyan]")
     page.get_by_role("button", name="Runtime", exact=True).click()
-    
+
     console.print("[cyan]Opening Change runtime type...[/cyan]")
     page.get_by_role("menuitem", name="Change runtime type", exact=True).click()
 
-    # Choose T4 GPU and save
+    # Select the free T4 GPU option available in Colab.
     console.print("[cyan]Selecting T4 GPU...[/cyan]")
     page.get_by_role("radio", name="T4 GPU").click()
-    
+
     console.print("[cyan]Saving runtime settings...[/cyan]")
     page.get_by_role("button", name="Save").click()
 
-    # Give Colab time to close the runtime dialog
+    # Give Colab time to close the runtime dialog before sending keyboard shortcuts.
     console.print("[cyan]Waiting for runtime dialog to close...[/cyan]")
     page.wait_for_timeout(3000)
     page.keyboard.press("Escape")
 
-    # Run all cells using shortcut 
-    #This might be fragile
+    # Start the notebook after the runtime is configured.
     console.print("[cyan]Running all cells...[/cyan]")
     page.keyboard.press("Control+F9")
     console.print("[green]✓ Runtime set and cells started[/green]")
