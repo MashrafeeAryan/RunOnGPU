@@ -2,6 +2,7 @@ from pathlib import Path
 
 
 def parse_config() -> dict:
+    # Each section maps to the list of commands RunOnGPU should run in Colab.
     config = {
         "setup": [],
         "build": [],
@@ -11,38 +12,35 @@ def parse_config() -> dict:
 
     current_section = None
 
+    # Path("runongpu.txt") looks for the file in the current terminal directory.
+    # Users should run RunOnGPU from the project folder that contains runongpu.txt.
     txt_path = Path("runongpu.txt")
 
     for line in txt_path.read_text(encoding="utf-8").splitlines():
-
-        # Remove spaces from beginning/end
         line = line.strip()
 
-        # Skip empty lines
+        # Ignore spacing and documentation inside runongpu.txt.
         if not line:
             continue
 
-        # Skip comments
         if line.startswith("#"):
             continue
 
-        # Detect section headers
+        # Section headers decide where the following commands should be stored.
+        # Example: [build] makes current_section equal to "build".
         if line.startswith("[") and line.endswith("]"):
             section = line[1:-1].lower()
-                
-            #Detects if user added an unknown section
+
             if section not in config:
                 raise ValueError(f"Unknown section: {section}")
 
             current_section = section
             continue
 
-        #If user puts commands before any section
+        # Commands must appear under a valid section so RunOnGPU knows when to run them.
         if current_section is None:
             raise ValueError("Command found before any section header.")
-        
-        # Add command to current section
+
         config[current_section].append(line)
 
     return config
-    
