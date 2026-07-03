@@ -10,8 +10,28 @@ from playwright.sync_api import sync_playwright
 from runongpu.config import load_config
 
 from rich.console import Console
+import socket
 
 console = Console()
+
+
+
+
+#Helper function to get another port incase one port fails
+
+def get_free_debug_port() -> int:
+    preferred_ports = [9222, 9223, 9224, 9225, 9226, 9227, 9228, 9229, 9230, 9231, 9232, 9233, 9234, 9235, 9236, 9237, 9238, 9239, 9240, 9241, 9242, 9243, 9244, 9245, 9246, 9247, 9248, 9249, 9250, 9251, 9252, 9253, 9254]
+
+    for port in preferred_ports:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            result = sock.connect_ex(('127.0.0.1', port))
+            if result != 0:
+                return port
+            
+    #if all ports are busy, let OS pick a random number
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(('127.0.0.1', 0))
+        return sock.getsockname()[1]
 
 # Path to the real Chrome executable on Windows.
 # RunOnGPU uses real Chrome because Colab/Google login is more reliable there
