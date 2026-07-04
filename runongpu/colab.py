@@ -19,9 +19,8 @@ console = Console()
 
 #Helper function to get another port incase one port fails
 
-def get_free_debug_port() -> int:
-    preferred_ports = [9222, 9223, 9224, 9225, 9226, 9227, 9228, 9229, 9230, 9231, 9232, 9233, 9234, 9235, 9236, 9237, 9238, 9239, 9240, 9241, 9242, 9243, 9244, 9245, 9246, 9247, 9248, 9249, 9250, 9251, 9252, 9253, 9254]
-
+def get_debug_port() -> int:
+    preferred_ports = [9223, 9224, 9225, 9226, 9227, 9228] # Start from 9223
     for port in preferred_ports:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             result = sock.connect_ex(('127.0.0.1', port))
@@ -58,14 +57,14 @@ DEBUG_PORT = 9222
 TEMPLATE_URL = "https://colab.research.google.com/drive/1pB8iVjR4-tPVSEBFjY8ow6N_F34bcMwi?usp=sharing"
 
 
-def wait_for_debug_port(timeout_seconds: int = 15) -> None:
+def wait_for_debug_port(port: int, timeout_seconds: int = 15) -> None:
     """Wait until Chrome is ready for Playwright to connect."""
     start_time = time.time()
 
     while time.time() - start_time < timeout_seconds:
         try:
             # Chrome exposes this local endpoint after remote debugging starts.
-            with urlopen(f"http://127.0.0.1:{DEBUG_PORT}/json/version", timeout=1):
+            with urlopen(f"http://127.0.0.1:{port}/json/version", timeout=1):
                 return
         except URLError:
             # Chrome can take a moment to launch, so retry briefly instead of failing immediately.
@@ -85,18 +84,29 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
 
     # Launch real Chrome with remote debugging enabled so Playwright can attach.
     # The custom profile lets users sign into Colab once and reuse that session.
-    subprocess.Popen([
-        str(CHROME_EXE),
-        f"--remote-debugging-port={DEBUG_PORT}",
-        f"--user-data-dir={RUNONGPU_PROFILE_DIR}",
-        "--no-first-run",
-        "--no-default-browser-check",
-        target_url,
-    ])
+    try:
+        subprocess.Popen([
+            str(CHROME_EXE),
+            f"--remote-debugging-port={DEBUG_PORT}",
+            f"--user-data-dir={RUNONGPU_PROFILE_DIR}",
+            "--no-first-run",
+            "--no-default-browser-check",
+            target_url,
+        ])
 
-    # Avoid connecting before Chrome has opened its debugging endpoint.
-    wait_for_debug_port()
-
+        # Avoid connecting before Chrome has opened its debugging endpoint.
+        wait_for_debug_port(port=DEBUG_PORT)
+    except RuntimeError:
+        DEBUG_PORT = get_debug_port()
+        subprocess.Popen([
+            str(CHROME_EXE),
+            f"--remote-debugging-port={DEBUG_PORT}",
+            f"--user-data-dir={RUNONGPU_PROFILE_DIR}",
+            "--no-first-run",
+            "--no-default-browser-check",
+            target_url,
+        ])
+        wait_for_debug_port(port=DEBUG_PORT)
     with sync_playwright() as playwright:
         # Attach to the already-open real Chrome window instead of launching a new browser.
         browser = playwright.chromium.connect_over_cdp(
