@@ -16,7 +16,6 @@ console = Console()
 
 
 
-
 #Helper function to get another port incase one port fails
 
 def get_debug_port() -> int:
@@ -50,7 +49,6 @@ RUNONGPU_PROFILE_DIR = Path.home() / ".runongpu" / "chrome-profile"
 
 # Local Chrome DevTools Protocol port.
 # Playwright connects to this port to control the real Chrome window.
-DEBUG_PORT = 9222
 
 # Shared starter notebook used only when the user does not already have a saved
 # RunOnGPU notebook URL.
@@ -72,14 +70,14 @@ def wait_for_debug_port(port: int, timeout_seconds: int = 15) -> None:
 
     
     raise RuntimeError(
-        f"Chrome did not open remote debugging port {DEBUG_PORT}. "
+        f"Chrome did not open remote debugging port {port}. "
         "Close Chrome and try again, or use a different debug port."
     )
 
 
 def open_colab(notebook_url: str = "", project_config: dict | None = None) -> str:
     """Open a saved Colab notebook, or copy the template notebook on first run."""
-
+    DEBUG_PORT = 9222
     target_url = notebook_url or TEMPLATE_URL
 
     # Launch real Chrome with remote debugging enabled so Playwright can attach.
