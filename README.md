@@ -7,24 +7,20 @@ It is useful if you want to test CUDA, PyTorch, or other GPU code but do not hav
 ## Requirements
 
 * Windows
-* Python 3.10+
+* Python 3.12.13+
 * Git
 * Google Chrome
 * Google account for Colab
 
 ## Install
-
+1. Install anaconda with Python >= 3.12.13 for smooth performance
+2. run following commands in your conda enviroment
 ```bash
-python -m pip install --user pipx
-python -m pipx ensurepath
-python -m pipx install runongpu
+pip install runongpu
 
 Check setup:
-
-```bash
 runongpu doctor
 ```
-
 ## Quick Start
 
 Go to the project you want to run and initialize RunOnGPU:
