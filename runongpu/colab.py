@@ -126,7 +126,7 @@ def open_colab(notebook_url: str = "", project_config: dict | None = None) -> st
                 # Switch automation to the copied notebook tab.
                 page = new_page_info.value
                 page.wait_for_load_state("domcontentloaded")
-
+                
                 copied_successfully = (
                     page.url != target_url
                     and "accounts.google.com" not in page.url
