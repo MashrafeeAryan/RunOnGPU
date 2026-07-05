@@ -5,7 +5,7 @@
 name = "runongpu"
 version = "1.0.1"
 description = "A CLI tool that runs GitHub projects on free cloud GPUs"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 readme = "README.md"
 
 # Runtime dependencies for the CLI.
