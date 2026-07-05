@@ -14,12 +14,15 @@ It is useful if you want to test CUDA, PyTorch, or other GPU code but do not hav
 
 ## Install
 1. Install anaconda with Python >= 3.12.13 for smooth performance
-2. Run following commands in your conda enviroment
-3. Make sure you do not touch chrome or move around your cursor as the program runs the code. 
+2. Publish your code in a public GitHub repo. You will use the GitHub repo URL 
+3. Run following commands in your conda enviroment
+4. Make sure you do not touch chrome or move around your cursor as the program runs the code. 
 ```bash
 pip install runongpu
+````
 
 Check setup:
+```bash
 runongpu doctor
 ```
 ## Quick Start
