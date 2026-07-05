@@ -24,17 +24,14 @@ runongpu doctor
 ## Quick Start
 
 Go to the project you want to run and initialize RunOnGPU:
-
 ```bash
 runongpu init
 ```
-
 Enter your GitHub repo URL when asked.
 
 This creates a `runongpu.txt` file. Edit this file to tell RunOnGPU how to set up, build, test, and run your project.
 
 Then run:
-
 ```bash
 runongpu run
 ```
