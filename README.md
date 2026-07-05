@@ -14,7 +14,8 @@ It is useful if you want to test CUDA, PyTorch, or other GPU code but do not hav
 
 ## Install
 1. Install anaconda with Python >= 3.12.13 for smooth performance
-2. run following commands in your conda enviroment
+2. Run following commands in your conda enviroment
+3. Make sure you do not touch chrome or move around your cursor as the program runs the code. 
 ```bash
 pip install runongpu
 
@@ -36,9 +37,10 @@ Then run:
 runongpu run
 ```
 
-RunOnGPU will open Colab, copy the starter notebook, clone your repo, set the runtime to a T4 GPU, and run your commands.
+RunOnGPU will open Colab, copy the starter notebook, clone your repo, set the runtime to a T4 GPU, and run your commands. If for some reason, it doesn't work on the first try, press enter in your command line interface to restart the program. 
 
 ## runongpu.txt
+You need this to run neccesary commands. You must edit this file to ensure your program runs smoothly.
 
 `runongpu.txt` controls what happens inside Colab.
 
