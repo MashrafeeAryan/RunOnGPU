@@ -3,9 +3,9 @@
 # and which third-party libraries must be installed with it.
 [project]
 name = "runongpu"
-version = "0.1.0"
+version = "1.0.0"
 description = "A CLI tool that runs GitHub projects on free cloud GPUs"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 readme = "README.md"
 
 # Runtime dependencies for the CLI.
