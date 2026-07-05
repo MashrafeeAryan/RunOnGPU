@@ -152,6 +152,9 @@ On the first run, you may need to sign into Google Colab. RunOnGPU saves the cop
 
 Do not interact with the Colab window while RunOnGPU is setting it up.
 
+Examples of RunOnGPU use:
+https://github.com/MashrafeeAryan/runongpu-examples
+
 ## Run Tests
 
 ```bash
