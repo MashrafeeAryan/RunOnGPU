@@ -13,6 +13,7 @@ It is useful if you want to test CUDA, PyTorch, or other GPU code but do not hav
 * Google account for Colab
 
 ## Install
+Example video: https://www.loom.com/share/79d5dfd3cba4401fb2fd5967a8438391
 1. Install anaconda with Python >= 3.12.13 for smooth performance
 2. Publish your code in a public GitHub repo. You will use the GitHub repo URL
 3. Create conda environment. You can use any name you like but for following example, we used test_env.
