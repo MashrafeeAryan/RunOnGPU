@@ -21,16 +21,15 @@ conda create --name test_env "python>3.12"
 conda activate test_env
 ```
 4. Run following commands in your conda enviroment
-5. Make sure you do not touch chrome or move around your cursor as the program runs the code.
-6. Be prepared to sign in to your google account once. Your profile will be saved for future sessions.
 ```bash
 pip install runongpu
 ````
-
 Check setup:
 ```bash
 runongpu doctor
 ```
+5. Make sure you do not touch chrome or move around your cursor as the program runs the code.
+6. Be prepared to sign in to your google account once. Your profile will be saved for future sessions.
 ## Quick Start
 
 Go to the project you want to run and initialize RunOnGPU:
